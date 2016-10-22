@@ -1,6 +1,6 @@
+echo '$@'
 echo $@
-echo "hello"
-
+echo '$#'
 echo $#
-
+echo '$*'
 echo $*
