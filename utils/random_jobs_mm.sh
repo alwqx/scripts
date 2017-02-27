@@ -1,8 +1,8 @@
 #! /bin/bash
 # random post request to Mesos and Marathon cluster.
-
-# set -o
-# set -x
+# usage ./random_jobs_mm.sh
+# run as daemon:(refer http://stackoverflow.com/questions/19233529/run-bash-script-as-daemon)
+#       setsid ./random_jobs_mm.sh >> ~/random_job.log 2>&1 < /dev/null &
 
 #declare args
 host_url=
@@ -114,6 +114,3 @@ function main() {
 
 echo "start random-jobs"
 main
-
-# refer http://stackoverflow.com/questions/19233529/run-bash-script-as-daemon
-# to run as daemon
