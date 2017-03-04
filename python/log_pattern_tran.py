@@ -5,6 +5,7 @@ import json
 import random
 import os
 import operator
+import math
 
 #数据过滤出现问题，
 """
@@ -23,7 +24,7 @@ v1
 v2
 user_project
 """
-def validate(x):
+def validate_subpath(x):
     #filter "" , ff4850fe828147f8bbb9
     if len(x) == 0 or x == "," or len(x) >= 20:
         return False
@@ -48,7 +49,7 @@ def generate_key_group_value(filepath):
     for line in f.readlines():
         pattern = json.loads(line.rstrip("\n"))
         path = pattern["path"]
-        path_list = [x.strip() for x in path.split("/") if validate(x)]
+        path_list = [x.strip() for x in path.split("/") if validate_subpath(x)]
         k = str(pattern["view_name"])
         if k in ret.keys():
             ret[k].append(path_list)
@@ -111,6 +112,10 @@ def test_parse_url():
     url1 = "/api/v1/palegreen/example/?ids=3865003,3865006"
     assert parse_url(url1) == ["api", "v1", "palegreen", "example"]
 
+"""
+weight_path: {"api":0.5, "v1":0.2,...,"user":0.7}
+path_list: ["api", "v2", "user", "list"]
+"""
 def similarity(weight_path, path_list):
     weight = 0.0
     keys = weight_path.keys()
@@ -118,6 +123,37 @@ def similarity(weight_path, path_list):
         if p in keys:
             weight += weight_path[p]
     return weight
+
+def similarity_v1(weight_path, path_list):
+    weight = 0.0
+    keys = weight_path.keys()
+    diff = abs(len(keys) - len(path_list))*0.1
+    for p in path_list:
+        if p in keys:
+            weight += weight_path[p]
+    return weight+diff
+
+def similarity_v2(weight_path, path_list):
+    weight = 0.0
+    keys = weight_path.keys()
+    #从长度考虑差异性
+    diff = abs(len(keys) - len(path_list))*0.1
+
+    for p in path_list:
+        if p in keys:
+            weight += pow(weight_path[p], 2)
+    return math.sqrt(weight)+diff
+
+def similarity_v3(weight_path, path_list):
+    weight = 0.0
+    keys = weight_path.keys()
+    #从长度考虑差异性
+    diff = abs(len(keys) - len(path_list))*1
+
+    for p in path_list:
+        if p in keys:
+            weight += pow(weight_path[p]*10, 2)
+    return math.sqrt(weight)+diff
 
 def get_data(filepath, ratio, testSet=[]):
     with open(filepath, "r") as f:
@@ -139,16 +175,18 @@ def get_accuracy(actual, predictions):
 
 def train():
     filepath = "/tmp/PatternAssignment/train_clean_norepeat.jsonl"
+    filepath2 = "/tmp/PatternAssignment/train_clean.jsonl"    
     testSet = []
     predictions = []
     actual = []
 
-    get_data(filepath, 0.7, testSet)
-    view_weight_path = generate_key_weight_value(filepath, 0.2)
+    get_data(filepath, 0.8, testSet)
+    # view_weight_path = generate_key_weight_value(filepath, 0.1)
+    view_weight_path = generate_key_weight_value(filepath, 0.1)    
 
     for ele in testSet:
         #{view_name, path}
-        similaritis = {k:similarity(v, ele["path"]) for k,v in view_weight_path.items()}
+        similaritis = {k:similarity_v1(v, ele["path"]) for k,v in view_weight_path.items()}
         sortedVotes = sorted(similaritis.items(), key=operator.itemgetter(1), reverse=True)
         predictions.append(sortedVotes[0][0])
         actual.append(ele["view_name"])
