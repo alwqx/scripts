@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # -*- coding:utf-8 -*-
 
-#import numpy as np
-#import pandas as pd
 import json
 import random
 import os
@@ -111,8 +109,7 @@ def parse_url(url):
 
 def test_parse_url():
     url1 = "/api/v1/palegreen/example/?ids=3865003,3865006"
-    assert parse_input(url1) == ["api", "v1", "palegreen", "example"]
-
+    assert parse_url(url1) == ["api", "v1", "palegreen", "example"]
 
 def similarity(weight_path, path_list):
     weight = 0.0
@@ -121,25 +118,6 @@ def similarity(weight_path, path_list):
         if p in keys:
             weight += weight_path[p]
     return weight
-
-def main():
-    """
-    1. get key(view) and weight paths...done
-    2. get input path...done
-    3. traverse key_weight_path
-            [{k:view, similarity:}]
-
-    """
-    url = "/api/v1/palegreen/example/?ids=3865003,3865006"
-    filepath = "/home/geek/workspace/newjobwp/shanbay/PatternAssignment/train_clean_norepeat.jsonl"
-
-    path = parse_url(url)
-    path_list = [["api", "v1", "palegreen", "note"], ["api","v1","palegreen","example"],["api","v1","oldlace","userapplet"],["api","v1","palegreen","review","sync"],["api","v1","lightgoldenrodyellow","user"]]
-    view_weight_path = generate_key_weight_value(filepath, 0.2)
-    for path in path_list:
-        similaritis = {k:similarity(v, path) for k,v in view_weight_path.items()}
-        sortedVotes = sorted(similaritis.items(), key=operator.itemgetter(1), reverse=True)
-        print(sortedVotes[:4])
 
 def get_data(filepath, ratio, testSet=[]):
     with open(filepath, "r") as f:
@@ -150,13 +128,33 @@ def get_data(filepath, ratio, testSet=[]):
                 jf["path"] = path
                 testSet.append(jf)
 
-def get_accuracy(testSet, predictions):
+def get_accuracy(actual, predictions):
+    length = len(actual)
+    count = 0
+    for i in range(length):
+        if actual[i] == predictions[i]:
+            count += 1
+    acc = float(count)/length * 100.0
+    print("accuracy:" + repr(acc) + "%")
 
-def test_train():
-    filepath = "/home/geek/workspace/newjobwp/shanbay/PatternAssignment/train_clean_norepeat.jsonl"
+def train():
+    filepath = "/tmp/PatternAssignment/train_clean_norepeat.jsonl"
     testSet = []
-    get_data(filepath, 0.5, testSet)
+    predictions = []
+    actual = []
+
+    get_data(filepath, 0.7, testSet)
+    view_weight_path = generate_key_weight_value(filepath, 0.2)
+
+    for ele in testSet:
+        #{view_name, path}
+        similaritis = {k:similarity(v, ele["path"]) for k,v in view_weight_path.items()}
+        sortedVotes = sorted(similaritis.items(), key=operator.itemgetter(1), reverse=True)
+        predictions.append(sortedVotes[0][0])
+        actual.append(ele["view_name"])
+    get_accuracy(actual, predictions)
 
 if __name__ == "__main__":
-    main()
+    # main()
+    train()
 
