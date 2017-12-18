@@ -1,0 +1,2 @@
+#! /bin/bash
+docker run -it --rm --name maven -v $HOME/.m2:/root/.m2 adolphlwq/docker-maven:latest bash
