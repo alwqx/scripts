@@ -1,0 +1,2 @@
+#! /bin/bash
+find ./ -regex '.*\(jpg\|JPG\|png\|jpeg\)' -size +500k -exec convert -resize 1024x1024 {} {} \;
