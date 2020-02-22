@@ -1,0 +1,10 @@
+#! /bin/bash
+os=$(uname -r)
+
+if [[ $(echo $os | grep "arch") != "" ]]
+then
+    # if want no confirm, add option --noconfirm
+    sudo pacman -Syu
+else
+    echo "not support os version ${os}, update upos.sh in github.com/adolphlwq/scripts"
+fi
