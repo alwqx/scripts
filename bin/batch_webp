@@ -1,2 +1,10 @@
 #! /bin/bash
-find ./ -regex '.*\(jpg\|JPG\|png\|jpeg\)' -exec cwebp {} -o {} \;
+
+# below for mac
+find . -name "*.jpg" -exec cwebp {} -o {} \;
+find . -name "*.JPG" -exec cwebp {} -o {} \;
+find . -name "*.png" -exec cwebp {} -o {} \;
+find . -name "*.jpeg" -exec cwebp {} -o {} \;
+
+# below for Linux, comment in mac
+# find ./ -regex '.*\(jpg\|JPG\|png\|jpeg\)' -exec cwebp {} -o {} \;
